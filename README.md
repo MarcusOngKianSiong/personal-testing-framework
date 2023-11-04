@@ -1,6 +1,8 @@
-// file2.js
-// console.log(globalThis.myGlobalVariable)
-// console.log(hello())
+# Project Name (if applicable)
+
+## Getting Started
+
+```javascript
 group("something",()=>{
     spec("test 1",()=>{
         const hi = 1;
@@ -13,6 +15,8 @@ group("something",()=>{
         expect(hi).toBe(bye)
     })
 })
+```
+![Output image](./.readme/basicOutput.png)
 
-
-
+## Improvements
+- [] Specify the reason for failed test

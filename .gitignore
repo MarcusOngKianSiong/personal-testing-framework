@@ -1,0 +1,3 @@
+# Include hidden files and directories
+!.coreOperation/
+!.readme/
