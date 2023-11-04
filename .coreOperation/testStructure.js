@@ -56,7 +56,9 @@ class comparisons{
     toBe(expected){
         this.specs[this.currentFocus.groupName][this.currentFocus.specName].expected = expected;
         this.specCompletionCounter += 1;
+        console.log("Check: ",this.specs)
         if(this.numberOfSpecs === this.specCompletionCounter){
+            
             this.formatForAnalysis()
             // console.log("Checking final form: ",this.finalForm)
         }
@@ -79,6 +81,7 @@ class comparisons{
                 }
             ]
     */
+            
             const finalForm = {}
             for(const groupName in this.specs){
                 finalForm[groupName] = [];
@@ -93,6 +96,7 @@ class comparisons{
                 }
             }
             this.finalForm = finalForm;
+            
             this.eventEmitter.emit("Collected all test case data",this.finalForm)
             return this.finalForm
     }
@@ -136,24 +140,17 @@ global.getFinalList = function(){
         })
 */
 
-global.expect = function(outcome){
-    
-    const finalGroupName = outcomes.getCurrentGroup();
-    const finalSpecName = outcomes.getCurrentSpec();
-    outcomes.addActualOutput(finalGroupName,finalSpecName,outcome);
-    return outcomes;
-    
-}
+// The problem right now is asynchronous operation caused by promises
+// The promise caused the next spec to run, thereby changing the "current" object despite not completing its operation yet, 
+// WHen the current object shifts forward, and the promise finished running, the output of the promise will be stored based on
+// what is "current" object is. This whole thing is wrong. 
+// To make sure that the "current group" does not move ahead before the completion of the previous, what do I do?
+/*
+        1. Make sure the current group does not move ahead before the completion of the previous
+        2. Make the specs move at their own pace, as long as their data end up at the same place. 
+*/
 
-
-global.spec = function(specName,func){
-    const groupName = outcomes.getCurrentGroup();
-    outcomes.addNewSpec(groupName,specName);
-    outcomes.setSpecFocus(specName);
-    func()
-    
-}
-
+// CORE TEST WRITING STRUCTURE
 global.group = async function(groupName,func){
     
     outcomes.addnewGroup(groupName);
@@ -161,6 +158,19 @@ global.group = async function(groupName,func){
     
     func()
     return true
+}
+global.spec = function(specName,func){
+    // Set a new spec in the object
+    const groupName = outcomes.getCurrentGroup();
+    outcomes.addNewSpec(groupName,specName);
+    outcomes.setSpecFocus(specName);
+    func();
+}
+global.expect = function(outcome){
+    const finalGroupName = outcomes.getCurrentGroup();
+    const finalSpecName = outcomes.getCurrentSpec();
+    outcomes.addActualOutput(finalGroupName,finalSpecName,outcome);
+    return outcomes; 
 }
 
 // group("something",()=>{

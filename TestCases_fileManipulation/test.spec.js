@@ -9,13 +9,15 @@ group("fileEditingProgram",()=>{
         // const fileName = '../TestCases_fileManipulation/sampleFiles/replaceEntireContent.js'
         // const fileName = '../TestCases_fileManipulation/sampleFiles/replaceEntireContent.js'
         const fileName = path.join(__dirname,"sampleFiles","replaceEntireContent.js")
-        const data = 'something here'
+        const data = 'something here';
         await replaceEntireFileContent(data,fileName);
         const outcome = await retrieveFileContent(fileName);
-        expect(outcome).toBe("soemthign");
+        // NOTE!!!! -> Expect to be wrong
+        expect(outcome).toBe(data);
     })
     spec("input text into specific section of a file",()=>{
         // function name: insertTextIntoSpecificFileSection
+        console.log("Working on this---")
         expect(1).toBe(1);
     })
 
