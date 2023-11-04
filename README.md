@@ -1,5 +1,3 @@
-# Project Name (if applicable)
-
 ## Getting Started
 
 ```javascript
