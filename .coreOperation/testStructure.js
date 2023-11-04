@@ -12,6 +12,12 @@ class comparisons{
             groupName: null,
             specName: null
         }
+        this.numberOfSpecs = 0;
+        this.specCompletionCounter = 0;
+        this.eventEmitter = null
+    }
+    addEventEmitter(eventEmitterObject){
+        this.eventEmitter = eventEmitterObject
     }
     addnewGroup(groupName){
         this.specs[groupName] = {}
@@ -27,6 +33,9 @@ class comparisons{
     }
     addActualOutput(groupName,specName,actualOutput){
         this.specs[groupName][specName].actual = actualOutput;
+    }
+    setNumberOfSpecs(number){
+        this.numberOfSpecs = number
     }
     setGroupFocus(groupName){
         this.currentFocus.groupName = groupName;
@@ -46,6 +55,14 @@ class comparisons{
     }
     toBe(expected){
         this.specs[this.currentFocus.groupName][this.currentFocus.specName].expected = expected;
+        this.specCompletionCounter += 1;
+        if(this.numberOfSpecs === this.specCompletionCounter){
+            this.formatForAnalysis()
+            // console.log("Checking final form: ",this.finalForm)
+        }
+    }
+    checkNumberOfSpecsCompleted(){
+        return this.specCompletionCounter;
     }
     formatForAnalysis(){
             /*
@@ -76,11 +93,29 @@ class comparisons{
                 }
             }
             this.finalForm = finalForm;
+            this.eventEmitter.emit("Collected all test case data",this.finalForm)
+            return this.finalForm
     }
 }
 
 const outcomes = new comparisons()
 
+global.addEventEmitter = function(eventEmitterObject){
+    outcomes.addEventEmitter(eventEmitterObject);
+}
+
+// SPECS
+global.setNumberOfSpecs = function(number){
+    outcomes.setNumberOfSpecs(number);
+}
+global.checkNumberOfSpecs = function(){
+    return outcomes.numberOfSpecs
+}
+global.checkNumberOfSpecsCompleted = function(){
+    outcomes.checkNumberOfSpecsCompleted()
+}
+
+// Convert for test case analysis and display
 global.formatForAnalysis = function(){
     outcomes.formatForAnalysis()
 }
@@ -102,10 +137,12 @@ global.getFinalList = function(){
 */
 
 global.expect = function(outcome){
+    
     const finalGroupName = outcomes.getCurrentGroup();
     const finalSpecName = outcomes.getCurrentSpec();
     outcomes.addActualOutput(finalGroupName,finalSpecName,outcome);
     return outcomes;
+    
 }
 
 
@@ -114,12 +151,16 @@ global.spec = function(specName,func){
     outcomes.addNewSpec(groupName,specName);
     outcomes.setSpecFocus(specName);
     func()
+    
 }
 
-global.group = function(groupName,func){
+global.group = async function(groupName,func){
+    
     outcomes.addnewGroup(groupName);
     outcomes.setGroupFocus(groupName);
+    
     func()
+    return true
 }
 
 // group("something",()=>{
