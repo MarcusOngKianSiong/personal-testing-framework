@@ -9,6 +9,7 @@ function individualStorage(){
                 toBe: (value) => {
                     testData.expected = value;
                     collection[description] = testData;
+                    console.log("CHECK: ",testData)
                 },
             };
         };
@@ -40,23 +41,35 @@ function groupStorage(){
 const {describe,returnFinalOutput} = groupStorage();
 const {it,returnCollection} = individualStorage()
 
+global.describe = describe;
+global.returnFinalOutput = returnFinalOutput;
+global.it = it;
+global.returnCollection = returnCollection; 
 
 
-// describe("something",()=>{
-//     it("nothing",(expect)=>{
-//         expect(1).toBe(1)
-//     })
-// })
-// describe("hi",()=>{
-//     it("bye",(expect)=>{
-//         expect(2).toBe(1)
-//     })
-//     it("hey",async (expect)=>{
-//         expect(3).toBe(4)
-//     })
-// })
 
-// console.log(returnFinalOutput())
+describe("something",()=>{
+    it("nothing",(expect)=>{
+        expect(1).toBe(1)
+    })
+})
+describe("hi",()=>{
+    // it("bye",(expect)=>{
+    //     expect(2).toBe(1)
+    // })
+    it("hey",async (expect)=>{
+        const data = await something();
+        expect(data).toBe("what the fuck?")
+    })
+
+
+})
+
+async function something(){
+    return "what the fuck?"
+}
+
+console.log(returnFinalOutput())
 
 
 
