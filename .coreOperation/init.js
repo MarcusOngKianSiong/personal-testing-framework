@@ -1,11 +1,42 @@
-require('./testStatus.js')
+/*
+    Structure:
+        1. Set up the functions                             ->      
+        2. Run the tests                                    ->      How to make it as convenient as jasmine testing (npm test)?
+        3. Retrieve data from testStructure function        ->      returnFinalOutput
+        4. Analyse and display                              ->      testStatus class object
+*/
+
+
+// SETUP
 require('./testStructure.js');
-// Run every single test file in the directory
+require('./testStatus.js');
+
+// Run test cases
 require('../testCases.spec.js')
 
-// format the data
-formatForAnalysis();
 
-// Display the data
-processing(getFinalList());
+// Package, analyse, and show test results
+unpackSpecifications()
+runAllTests().then(res=>{
+    const testStatus = newTestStatusClass(res)
+    testStatus.generateResults();
+    testStatus.displayResults();
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
