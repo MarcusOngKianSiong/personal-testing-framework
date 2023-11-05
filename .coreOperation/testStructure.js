@@ -6,10 +6,10 @@
     main problem: 
         Async functions will affect the order of execution, which affects the attachment of data to 
         their respective groups or specification.
-
+        
     Strategy: 
         Collect arrow functions, group them by steps (group arrow functions, spec arrow functions), execute in order
-            
+
     Description:
         Collect all the arrow functions, execute the arrow functions in order, in an async function, to prevent
         functions from executing before the completion of the previous. 
