@@ -1,189 +1,200 @@
-myGlobalVariable = 'Hello from file1!';
+// Since when you run the arrow function passed to group function, it is typically not a promise. 
+// If it is typically not a promise, then I can potentially do it by order. 
 
-global.hello = function(){
-    return 1
-}
 
-class comparisons{
+/*
+    main problem: 
+        Async functions will affect the order of execution, which affects the attachment of data to 
+        their respective groups or specification.
+
+    Strategy: 
+        Collect arrow functions, group them by steps (group arrow functions, spec arrow functions), execute in order
+            
+    Description:
+        Collect all the arrow functions, execute the arrow functions in order, in an async function, to prevent
+        functions from executing before the completion of the previous. 
+
+*/
+
+
+const fs = require('fs').promises
+const path = require('path')
+
+class testCaseManagement{
     constructor(){
-        this.specs = {}
-        this.finalForm = null;
-        this.currentFocus = {
-            groupName: null,
-            specName: null
-        }
-        this.numberOfSpecs = 0;
-        this.specCompletionCounter = 0;
-        this.eventEmitter = null
+        // Gather all arrow functions passed to describes
+        this.testGroupsFuncs = {};
+        // Gather all the arrow functions passed to it, grouped based on group name
+        this.testGroupSpecs = {};
+        // The final output (expected, actual) to be passed for checking if test is successful
+        this.testCaseComparisonData = {};
+        // Check current group to gather arrow functions from
+        this.currentTestGroup = null;
+        // Meant for 
+        
     }
-    addEventEmitter(eventEmitterObject){
-        this.eventEmitter = eventEmitterObject
-    }
-    addnewGroup(groupName){
-        this.specs[groupName] = {}
-    }
-    addNewSpec(groupName,specName){
-        this.specs[groupName][specName] = {
-            expected: null,
-            actual: null
+    insertNewGroup(groupName,func){
+        this.testGroupsFuncs[groupName] = {
+            unpackSpecs: func,
         }
     }
-    addExpectedOutput(groupName,specName,expectedOutput){
-        this.specs[groupName][specName].expected = expectedOutput;
+    // Create a new section
+    unpackSpecifications(){
+        // console.log("Check test group funcs: ",this.testGroupsFuncs)
+        for(const name in this.testGroupsFuncs){
+            this.currentTestGroup = name;
+            this.testGroupsFuncs[name].unpackSpecs();
+        }
+        this.currentTestGroup = null;
+        // console.log("check test group specs: ",this.testGroupSpecs);
     }
-    addActualOutput(groupName,specName,actualOutput){
-        this.specs[groupName][specName].actual = actualOutput;
+    insertSpecFunction(name,func){
+        // If in process
+        if(!this.testGroupSpecs[this.currentTestGroup]){
+            this.testGroupSpecs[this.currentTestGroup] = {};
+        }
+        this.testGroupSpecs[this.currentTestGroup][name] = func;
     }
-    setNumberOfSpecs(number){
-        this.numberOfSpecs = number
-    }
-    setGroupFocus(groupName){
-        this.currentFocus.groupName = groupName;
-    }
-    setSpecFocus(specName){
-        this.currentFocus.specName = specName;
-    }
-    getCurrentGroup(){
-        return this.currentFocus.groupName;
-    }
-    getCurrentSpec(){
-        return this.currentFocus.specName;
-    }
-    resetCurrentFocus(){
-        this.currentFocus.groupName = null;
-        this.currentFocus.specName = null;
-    }
-    toBe(expected){
-        this.specs[this.currentFocus.groupName][this.currentFocus.specName].expected = expected;
-        this.specCompletionCounter += 1;
-        console.log("Check: ",this.specs)
-        if(this.numberOfSpecs === this.specCompletionCounter){
-            
-            this.formatForAnalysis()
-            // console.log("Checking final form: ",this.finalForm)
+    insertComparisonData(type,data){
+        if(this.testCaseComparisonData[this.comparisonData_currentTestGroup][this.comparisonData_currentSpecification]){
+            if(type === "expected"){
+                this.testCaseComparisonData[this.comparisonData_currentTestGroup][this.comparisonData_currentSpecification].expected = data;
+                return true;
+            }
+            if(type === "actual"){
+                this.testCaseComparisonData[this.comparisonData_currentTestGroup][this.comparisonData_currentSpecification].actual = data;
+                return true;
+            }
+        }else{
+            throw new Error("No such specification")
         }
     }
-    checkNumberOfSpecsCompleted(){
-        return this.specCompletionCounter;
+
+    checkCurrentTestGroup(){
+        /*Work in unison with unpackSpecifications method */
+        return this.currentTestGroup
     }
-    formatForAnalysis(){
-            /*
-        Expected input format:
-            1. groupName            -> "something"
-            2. testDescription      -> [
-                {
-                    description: "lalala",
-                    status: true
-                },
-                {
-                    description: "blablabla",
-                    status: false
-                }
-            ]
-    */
-            
-            const finalForm = {}
-            for(const groupName in this.specs){
-                finalForm[groupName] = [];
-                const specs = this.specs[groupName];
-                for(const spec in specs){
-                    const specActualAndExpected = specs[spec];
-                    finalForm[groupName].push({
-                        description: spec,
-                        actual: specActualAndExpected.actual,
-                        expected: specActualAndExpected.expected
-                    })
+    checkComparisonData_currentTestGroup(){
+        if(this.comparisonData_currentTestGroup){
+            return this.comparisonData_currentTestGroup
+        }else{
+            throw new Error("runAllTests() not executed");
+        }
+    }
+    checkComparisonData_currentSpecification(){
+        if(this.comparisonData_currentSpecification){
+            return this.comparisonData_currentSpecification
+        }else{
+            throw new Error("runAllTests() not executed");
+        }
+    }
+    
+    /**
+     *
+     * @Concerns
+     *  1. How can I be sure each 
+     * @memberof testCaseManagement
+     */
+    async runAllTests(){
+        if(!this.testGroupSpecs){
+            throw new Error("test group no ready");
+        }
+        // Specify counters
+        this.comparisonData_currentTestGroup = null;
+        this.comparisonData_currentSpecification = null;
+
+        for(const groupName in this.testGroupSpecs){
+            const groupSpecs = this.testGroupSpecs[groupName];                                              // Isolate the group specification to be looped
+            this.testCaseComparisonData[groupName] = {}                                                     // setup testCaseComparisonData with current group focus
+            this.comparisonData_currentTestGroup = groupName;                                               // Specify current group
+            for(const specName in groupSpecs){
+                this.testCaseComparisonData[groupName][specName] = {expected: null, actual: null};          // Setup testCaseComparisonData with current specification and object to collect expected and actual data.
+                const currentSpec = groupSpecs[specName];                                                   // Isolate the single specification to be executed
+                this.comparisonData_currentSpecification = specName;                                        // Specify current specification
+                if(currentSpec[Symbol.toStringTag] === "AsyncFunction"){
+                    await currentSpec(); 
+                }else{
+                    currentSpec();
+                    // console.log("    ",groupSpecs[specName]())
                 }
             }
-            this.finalForm = finalForm;
-            
-            this.eventEmitter.emit("Collected all test case data",this.finalForm)
-            return this.finalForm
+        }
+        // console.log("Check final outcome: ",this.testCaseComparisonData)
+        return this.testCaseComparisonData;
     }
 }
 
-const outcomes = new comparisons()
+const testRound = new testCaseManagement()
 
-global.addEventEmitter = function(eventEmitterObject){
-    outcomes.addEventEmitter(eventEmitterObject);
+
+// Debugging tools
+global.viewAll = function(){
+    console.log("Test group functions: ",testRound.testGroupsFuncs);
+    console.log("Test group specifications: ",testRound.testGroupSpecs);
+    console.log("Final output: ",testRound.testCaseComparisonData);
 }
 
-// SPECS
-global.setNumberOfSpecs = function(number){
-    outcomes.setNumberOfSpecs(number);
+
+//WRAPPER
+global.unpackSpecifications = function(){
+    testRound.unpackSpecifications()
 }
-global.checkNumberOfSpecs = function(){
-    return outcomes.numberOfSpecs
-}
-global.checkNumberOfSpecsCompleted = function(){
-    outcomes.checkNumberOfSpecsCompleted()
+global.runAllTests = async function(){
+    return testRound.runAllTests()
 }
 
-// Convert for test case analysis and display
-global.formatForAnalysis = function(){
-    outcomes.formatForAnalysis()
+
+// WHAT TO USE
+global.describe = function(name,func){
+    testRound.insertNewGroup(name,func);
 }
 
-global.getFinalList = function(){
-    return outcomes.finalForm
+global.it = function(name,func){
+    testRound.insertSpecFunction(name,func);
 }
 
-/*
-    How do I want to design how I would write the tests? 
-        group("group name",()=>{
-            spec("spec name",()=>{
-
-            })
-            spec("spec name",()=>{
-                expect(x).toBe(x)
-            })
-        })
-*/
-
-// The problem right now is asynchronous operation caused by promises
-// The promise caused the next spec to run, thereby changing the "current" object despite not completing its operation yet, 
-// WHen the current object shifts forward, and the promise finished running, the output of the promise will be stored based on
-// what is "current" object is. This whole thing is wrong. 
-// To make sure that the "current group" does not move ahead before the completion of the previous, what do I do?
-/*
-        1. Make sure the current group does not move ahead before the completion of the previous
-        2. Make the specs move at their own pace, as long as their data end up at the same place. 
-*/
-
-// CORE TEST WRITING STRUCTURE
-global.group = async function(groupName,func){
-    
-    outcomes.addnewGroup(groupName);
-    outcomes.setGroupFocus(groupName);
-    
-    func()
-    return true
-}
-global.spec = function(specName,func){
-    // Set a new spec in the object
-    const groupName = outcomes.getCurrentGroup();
-    outcomes.addNewSpec(groupName,specName);
-    outcomes.setSpecFocus(specName);
-    func();
-}
-global.expect = function(outcome){
-    const finalGroupName = outcomes.getCurrentGroup();
-    const finalSpecName = outcomes.getCurrentSpec();
-    outcomes.addActualOutput(finalGroupName,finalSpecName,outcome);
-    return outcomes; 
+global.expect = function(actual){
+    testRound.insertComparisonData("actual",actual);
+    return {toBe: (expected)=>{
+        testRound.insertComparisonData("expected",expected);
+    }}
 }
 
-// group("something",()=>{
-//     spec("test 1",()=>{
-//         const hi = 1;
-//         const bye = 1;
-//         expect(hi).toBe(bye)
+// describe("something",()=>{
+//     // You pass me a function to run all the it cases. 
+//     // However, how do I make sure that these it cases attaches itself to the describe?
+//     it('test 1',async ()=>{
+//         expect(1).toBe(1)
 //     })
-//     spec("test 2",()=>{
-//         const hi = 1;
-//         const bye = 1;
-//         expect(hi).toBe(bye)
+//     it('test 2',async ()=>{
+//         expect(2).toBe(2)
+//     })
+    
+// })
+// describe("nothing",()=>{
+//     // You pass me a function to run all the it cases. 
+//     // However, how do I make sure that these it cases attaches itself to the describe?
+//     it('test 2',()=>{
+//         expect(4).toBe(4)
+//     })
+//     it('test 1',async ()=>{
+//         const outcome = await someRandomFile()
+//         expect(outcome).toBe(3)
 //     })
 // })
-// outcomes.formatForAnalysis()
-// console.log(outcomes.finalForm)
+
+
+
+// // WHAT OT RUN AFTER
+// testRound.unpackSpecifications()
+// testRound.runAllTests()
+
+// async function something(){
+//     return "lalala"
+// }
+
+// async function someRandomFile(){
+//     const dir = path.join(__dirname,"sample.txt")
+//     const text = await fs.readFile(dir,'utf8');
+//     return text;
+// }

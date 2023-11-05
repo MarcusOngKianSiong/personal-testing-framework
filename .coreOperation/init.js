@@ -1,46 +1,30 @@
+/*
+    Structure:
+        1. Set up the functions                             ->      
+        2. Run the tests                                    ->      How to make it as convenient as jasmine testing (npm test)?
+        3. Retrieve data from testStructure function        ->      returnFinalOutput
+        4. Analyse and display                              ->      testStatus class object
+*/
 
-const { EventEmitter } = require('events');
-const myEmitter = new EventEmitter();
+/* 
+    Problems:
+        1. How can I be sure that test cases do not affect the data collected by other test cases?
+        2. How do I make sure that all the tests have been completed before getting all the test data to perform the check?
+        3. The test case can handle normal standard data. How to make it handle async functions?
+            - 
+*/
 
-require('./testStatus.js')
+// SETUP
 require('./testStructure.js');
-require('./testFileLocator.js');
-// Run every single test file in the directory
+require('./testStatus.js');
 
-myEmitter.on('Collected all test case data', (data) => {
-    console.log('Custom event received with data:', data);
-    processing(getFinalList());
-});
+// Run test cases
+require('../testCases.spec.js')
 
-
-// Go through the test file to check how many of specs are there. 
-// const targetTestFileLocation = path.join(__dirname,'..','TestCases_fileManipulation','test.spec.js');
-// const testFileLocation = findTestFileLocation('TestCases_fileManipulation','test.spec.js')
-// console.log("Check this: ",testFileLocation)
-const testFileLocation = '/Users/marcus/Desktop/testArea/personalTestingFramework/TestCases_fileManipulation/test.spec.js'
-const output = findNumberOfSpec('spec(',testFileLocation)
-output.then(numberOfSpecs=>{
-    setNumberOfSpecs(numberOfSpecs);
-    addEventEmitter(myEmitter);
-    // Run all the test cases
-    require('../TestCases_fileManipulation/test.spec.js')
-    // What do I do next?
-    // I need to figure out how to pass the data to the processing function. 
+// Package, analyse, and show test results
+unpackSpecifications()
+runAllTests().then(res=>{
+    const testStatus = newTestStatusClass(res)
+    testStatus.generateResults();
+    testStatus.displayResults();
 })
-
-
-// format the data
-// formatForAnalysis();
-
-
-
-// Display the data
-
-
-// HOW DO I MAKE SURE FORMATFORANALYSIS only runs after everything has finish running?
-// 1. When does it finish running?
-//          1. Check how many data spec() is there before running anything. 
-                    // 1. Everytime .toBe concludes, add one to counter, check a counter in the object. 
-                    //         1. If counter === number of spec(), 
-                    //                 Run formatForAnalysis()
-// 
