@@ -1,0 +1,68 @@
+--- standard -> vertex ---
+// Scaler
+float scalerX = ${scaled.widthScaling};
+float scalerY = ${scaled.heightScaling};
+float scaledX = a_position.x/scalerX;
+float scaledY = a_position.y/scalerY;
+// 
+gl_Position = vec4(scaledX,scaledY,0.0,1.0);
+--- standard -> vertex ---
+
+--- standard -> fragment ---
+gl_FragColor = u_color;
+--- standard -> fragment ---
+
+--- grid -> vertex ---
+// Scaler
+float scalerX = ${scaled.widthScaling};
+float scalerY = ${scaled.heightScaling};
+float scaledX = a_position.x/scalerX;
+float scaledY = a_position.y/scalerY;
+// 
+gl_Position = vec4(scaledX,scaledY,0.0,1.0);
+current_fragment_position = vec2(a_position.x,a_position.y);
+--- grid -> vertex ---
+
+--- grid -> fragment ---
+float blockWidth = shape_width/number_of_columns;
+float blockHeight = shape_height/number_of_rows; 
+float width_remainder = mod(current_fragment_position.x, blockWidth);
+float height_remainder = mod(current_fragment_position.y,blockHeight);
+if (width_remainder == 0.0) {
+    // This block is executed if either width_remainder or height_remainder is equal to 0.0
+    // Your code here
+    gl_FragColor = grid_color;
+}else if(height_remainder == 0.0){
+    gl_FragColor = grid_color;
+}else{
+    gl_FragColor = default_color;
+}
+--- grid -> fragment ---
+
+--- border -> vertex ---
+// Scaler
+float scalerX = ${scaled.widthScaling};
+float scalerY = ${scaled.heightScaling};
+float scaledX = a_position.x/scalerX;
+float scaledY = a_position.y/scalerY;
+current_position = vec2(a_position.x,a_position.y); 
+gl_Position = vec4(scaledX,scaledY,0.0,1.0);
+--- border -> vertex ---
+
+--- border -> fragment ---
+float left_limit_space = xLeft + width;
+float right_limit_space = xRight - width;
+float top_limit_space = yTop - width;
+float bottom_limit_space = yBottom + width;
+if(left_limit_space >= current_position.x){
+    gl_FragColor = border_color;
+}else if(right_limit_space <= current_position.x){
+    gl_FragColor = border_color;
+}else if(top_limit_space <= current_position.y){
+    gl_FragColor = border_color;
+}else if(bottom_limit_space >= current_position.y){
+    gl_FragColor = border_color;
+}
+--- border -> fragment ---
+
+

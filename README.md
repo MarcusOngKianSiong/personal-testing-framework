@@ -18,3 +18,5 @@ group("something",()=>{
 
 ## Improvements
 - [] Specify the reason for failed test
+- [] Create a comparison between items in an array
+- 

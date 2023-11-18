@@ -14,12 +14,15 @@
             - 
 */
 
+
 // SETUP
-require('./testStructure.js');
-require('./testStatus.js');
+require('./testStructure.js');      // Produce the functionality for writing test cases
+require('./testStatus.js');         // Produce the test outcome message
+require('./checkingTools.js');      // Tools that you can use in your test case
 
 // Run test cases
 require('../testCases.spec.js')
+require('../shaderManipulationTests/shaderManipulationTests.spec.js')
 
 // Package, analyse, and show test results
 unpackSpecifications()

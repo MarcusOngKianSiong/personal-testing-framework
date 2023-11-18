@@ -1,0 +1,41 @@
+/* -------- VERTEX SHADER VARIABLES -------- */
+attribute vec2 a_position;
+varying vec2 current_fragment_position;
+/* -------- VERTEX SHADER VARIABLES -------- */
+/* -------- VERTEX SHADER OPERATIONS -------- */
+void main(){
+    // Scaler
+        float scaledX = a_position.x/scalerX;
+        float scaledY = a_position.y/scalerY;
+    // 
+    gl_Position = vec4(scaledX,scaledY,0.0,1.0);
+    current_fragment_position = vec2(a_position.x,a_position.y);
+}
+/* -------- VERTEX SHADER OPERATIONS -------- */
+/* -------- FRAGMENT SHADER VARIABLES -------- */
+precision mediump float;
+uniform vec4 default_color;
+uniform vec4 grid_color;
+uniform float number_of_rows;
+uniform float number_of_columns;
+uniform float shape_width;
+uniform float shape_height;
+varying vec2 current_fragment_position;  // Shows current fragment
+/* -------- FRAGMENT SHADER VARIABLES -------- */
+/* -------- FRAGMENT SHADER OPERATIONS -------- */
+void main() {
+    float blockWidth = shape_width/number_of_columns;
+    float blockHeight = shape_height/number_of_rows; 
+    float width_remainder = mod(current_fragment_position.x, blockWidth);
+    float height_remainder = mod(current_fragment_position.y,blockHeight);
+    if (width_remainder == 0.0) {
+        // This block is executed if either width_remainder or height_remainder is equal to 0.0
+        // Your code here
+        gl_FragColor = grid_color;
+    }else if(height_remainder == 0.0){
+        gl_FragColor = grid_color;
+    }else{
+        gl_FragColor = default_color;
+    }
+}
+/* -------- FRAGMENT SHADER OPERATIONS -------- */

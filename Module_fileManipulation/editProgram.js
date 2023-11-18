@@ -1,7 +1,15 @@
 const fs = require('fs').promises; // Import the 'fs' module
 const path = require('path');
 const filePath = 'testing.js'; // Replace with the path to your file
-module.exports = {insertTextIntoSpecificFileSection,findAllUsingSpecificCriteria,replaceEntireFileContent, retrieveFileContent}
+
+module.exports = {
+    insertTextIntoSpecificFileSection,
+    findAllUsingSpecificCriteria,
+    replaceEntireFileContent, 
+    retrieveFileContent,
+    retrieveSpecificSection,
+    appendToFile
+}
 
 /*
     Program requirement:
@@ -289,70 +297,92 @@ async function findAllUsingSpecificCriteria(criteria,fileName,formatting=null){
     
 }
 
-// retrieveFileContent('../spec/fileManipulation/sampleFiles/sample3.js').then(res=>{
-//     console.log(res)
-//     console.log(res === "something")
-// }).catch(err=>{
-//     console.log(err.message)
-// })
+async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
 
-const location = "../spec/fileManipulation/sampleFiles/sample1.js"
-// retrieveFileContent(location).then(res=>{
+    if(typeof beginningTarget !== "string"){
+        throw new Error("beginning target parameter is not a string");
+    }
+    if(typeof endingTarget !== "string"){
+        throw new Error("ending target parameter is not a string");
+    }
+    if(typeof fileName !== "string"){
+        throw new Error("fileName parameter is not a string");   
+    }
+    if(!fileName.includes('.')){
+        throw new Error("fileName parameter does not have a file extension");
+    }
 
-//     const data = `const shader = {
-//     something here
-//     nothing healthcare
-//     What in the world
-                    
-// }`
-// const lalala = `const shader = {
-//     something here
-//     nothing healthcare
-//     What in the world
-                    
-// }`
-//     const x = res.split('\n');
-//     const y = data.split('\n');
-//     for(let i = 0;i < x.length;i++){
-//         console.log(x[i] === y[i])
-//         // console.log(countLeadingSpacesInLine(x[i]), countLeadingSpacesInLine(y[i]))
-        
-//     }
-//     console.log(res)
-//     console.log(data)
-//     console.log(lalala === data)
-// }).catch(err=>{
-//     console.log(err)
-// })
+    const fileContent = await fs.readFile(fileName,'utf8');
+    
+    const convertToArray = fileContent.split('\n');
+    const length = convertToArray.length;
+    let beginningIndex = null;
+    let endingIndex = null;
+
+
+    // Find the index of begining and end
+    for(let i = 0;i < length;i++){
+        const currentLine = convertToArray[i];
+        if(currentLine === beginningTarget){
+            beginningIndex = i;
+        }
+        if(currentLine === endingTarget){
+            endingIndex = i;
+            break;
+        }
+    }
+    
+
+    // error checking
+    if(beginningIndex === null || endingIndex === null){
+        throw new Error("Beginning target and ending target parameters are not properly set or does not exist.");
+    }
+    if(beginningIndex >= endingIndex){
+        throw new Error("Beginning target parameter comes after ending target parameter in the file");
+    }
+    if((endingIndex - beginningIndex) === 1){
+        throw new Error("There is nothing between the target parameters");
+    }
+
+    // Extract the section from the array of lines (from original file)
+    const sectionContent = convertToArray.slice(beginningIndex + 1,endingIndex);
+    
+
+    // Re-combine the section array into a string and return it. 
+    return sectionContent.join('\n');
+
+}
+
+async function appendToFile(fileName, content,nextLine=false){
+    if(typeof fileName !== "string"){
+        throw new Error("file name is not a string");
+    }
+    if(typeof content !== "string"){
+        throw new Error("content parameter is not a string");
+    }
+    if(typeof nextLine !== "boolean"){
+        throw new Error("next line parameter is not a boolean");
+    }
+    if(nextLine === true){
+        content = '\n' + content;
+    }
+    const outcome = await fs.appendFile(fileName,content,'utf8');
+    return outcome;
+}
 
 async function retrieveFileContent(fileName){
-    try{
+    
         if(typeof fileName !== "string"){
-            throw new Error(1);
+            throw new Error("file name is not a string");
         }
         if(!fileName.includes('.')){
-            throw new Error(2);
+            throw new Error("No files specified");
         }
         // Check if file exists
         await fs.access(fileName, fs.constants.F_OK);
         const outcome = await fs.readFile(fileName,'utf8');
         return outcome;
-    }catch(err){
-        if(err.code === "ENOENT"){
-            throw new Error(`--Error--\nFile name: editProgram.js\nLocation: retrieveFileContent\nStatus: file cannot be found. -> ${fileName}\n--- `);
-        } else if(err.code){
-            
-        }else{
-            switch(err.message){
-                case "1":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: retrieveFileContent\nStatus: file name is not a string.\n--- ");
-                case "2":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: retrieveFileContent\nStatus: file name does not have a file extension\n--- ");
-                default:
-                    throw new Error(`--Error--\nFile name: editProgram.js\nLocation: retrieveFileContent\nStatus: UNKNOWN ERROR -> ${err.message}\n--- `);
-            }
-        }
-    }
+    
     
 }
 /* ---CORE FUNCTIONS--- */
