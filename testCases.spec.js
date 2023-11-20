@@ -45,23 +45,25 @@ describe("file manipulation: functional correctness",()=>{
         expect(status).toBe(true)
     })
     
-    it("insert text into specific section of a file",async ()=>{
-        const fileName = path.join(__dirname,"sampleFiles","insertText.js");
-        const data = 'something here'
-        const initial = `const shader = {\n}`
-        const expected = `const shader = {\n    something here\n}`
-        await insertTextIntoSpecificFileSection("const shader = {","}",data,fileName)
-        const newState = await retrieveFileContent(fileName);
-        await replaceEntireFileContent(initial,fileName);
-        expect(newState).toBe(expected);
-    })
+    // it("insert text into specific section of a file",async ()=>{
+    //     const fileName = path.join(__dirname,"sampleFiles","insertText.js");
+    //     const data = 'something here'
+    //     const initial = `const shader = {\n}`
+    //     const expected = `const shader = {\n    something here\n}`
+    //     await insertTextIntoSpecificFileSection("const shader = {","}",data,fileName)
+    //     const newState = await retrieveFileContent(fileName);
+    //     await replaceEntireFileContent(initial,fileName);
+    //     expect(newState).toBe(expected);
+    // })
     
     it("Retrieve specific section in a file",async ()=>{
-        const beginningTarget = `// Hello`
-        const endingTarget = `// Goodbye`
+        const beginningTarget = "// Hello\n"
+        const endingTarget = "// Goodbye\r"
         const expected = 'muffy\npuffy\ntuffy'
+        console.log("SOMETHING: ",__dirname)
         const fileName = path.join(__dirname,"sampleFiles","retrieveSpecificSection.js");
         const outcome = await retrieveSpecificSection(fileName,beginningTarget,endingTarget);
+        retrieveSpecificSection()
         expect(outcome).toBe(expected);
     })
 

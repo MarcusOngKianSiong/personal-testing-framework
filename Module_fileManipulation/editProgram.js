@@ -1,6 +1,7 @@
 const fs = require('fs').promises; // Import the 'fs' module
 const path = require('path');
 const filePath = 'testing.js'; // Replace with the path to your file
+const os = require('os');
 
 module.exports = {
     insertTextIntoSpecificFileSection,
@@ -88,19 +89,19 @@ async function insertTextIntoSpecificFileSection(beginningTarget,endingTarget,in
             
     */
     
-    try{
+    
         /*Errors*/
             if (typeof beginningTarget !== 'string') {
-                throw new Error(1);
+                throw new Error("Beginnng target parameter is not a string");
             }
             if (typeof endingTarget !== 'string') {
-                throw new Error(2);
+                throw new Error("Ending target parameter is not a string");
             }
             if(!fileName.includes('.')){
-                throw new Error(3)
+                throw new Error("filename parameter is not a file")
             }
             if (typeof input !== 'string') {
-                throw new Error(4);
+                throw new Error("Input parameter is not a string");
             }
             
             const data = await fs.readFile(fileName, 'utf8')
@@ -135,10 +136,10 @@ async function insertTextIntoSpecificFileSection(beginningTarget,endingTarget,in
 
             // CHECK IF THERE IS THE AREA OR NOT
             if(areaOfInput.beginningIndex === -1){
-                throw new Error("5")
+                throw new Error("Beginning target not found in file")
             }
             if(areaOfInput.endingIndex === -1){
-                throw new Error("6");
+                throw new Error("Ending target not found in file");
             }
 
             // FIND INDENTATION INFORMATION
@@ -176,31 +177,6 @@ async function insertTextIntoSpecificFileSection(beginningTarget,endingTarget,in
             if(outcome === undefined){
                 return true
             }
-            
-    }catch(err){
-        if(err.code === "ENONET"){
-            // file not found 
-            /*Error 7*/ throw new Error("--Error--\nFile name: editProgram.js\nLocation: replaceFileContent\nStatus: File not found\n--- ");
-        }else{
-            switch(err.message){
-                case "1":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: Beginning target is not a string\n--- ")
-                case "2":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: Ending target is not a string\n--- ")
-                case "3":
-                    throw new Error(`--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: FIle name does not have a file extension -> ${fileName}\n--- `)
-                case "4":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: text to be inputted is not a string\n--- ")
-                case "5":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: Beginning target not found in file\n--- ")
-                case "6":
-                    throw new Error("--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: Ending target not found in file\n--- ")
-                default:
-                    throw new Error(`--Error--\nFile name: editProgram.js\nLocation: insertTextIntoSpecificFileSection\nStatus: UNKNOWN ERROR: ${err.message}\n--- `)
-            }
-        }
-    }
-    
 }
 /**
  * @abstract Goes through each line in the file, finds the lines that match the regex stated, returns an array that contains those match.
@@ -219,19 +195,19 @@ async function insertTextIntoSpecificFileSection(beginningTarget,endingTarget,in
  *      - Default: An unknown error occurred. 
  */
 async function findAllUsingSpecificCriteria(criteria,fileName,formatting=null){ 
-    try{
+    
         /*Errors*/
             if (typeof criteria !== 'string') {
-                throw new Error(1);
+                throw new Error("Criteria must be a string");
             }
             if (typeof fileName !== 'string') {
-                throw new Error(2);
+                throw new Error("File name is not a string.");
             }
             if(!fileName.includes('.')){
-                throw new Error(3)
+                throw new Error("File name parameter is not a fil")
             }
             if (!isRegExpString(criteria)) {
-                throw new Error(5);
+                throw new Error("criteria parameter is not a regex");
             }
 
         /*Errors*/
@@ -255,7 +231,7 @@ async function findAllUsingSpecificCriteria(criteria,fileName,formatting=null){
             
             // ERROR CHECKING: Check if there is even any match or not
             if(collectedMatch.length === 0){
-                throw new Error(7);
+                throw new Error("Match not found");
             }
 
             const formattedLineMatches = []
@@ -265,7 +241,7 @@ async function findAllUsingSpecificCriteria(criteria,fileName,formatting=null){
                 // ERROR CHECKING: Check if the function actually produces anything
                 const testOutputForEmptiness = formatting(collectedMatch[0])
                 if(testOutputForEmptiness === undefined || testOutputForEmptiness === null){
-                    throw new Error(8)
+                    throw new Error("Formatting function output s empty")
                 }
                 // Run formatting function against each regex line match
                 for(let i = 0;i < theLength;i++){
@@ -276,29 +252,12 @@ async function findAllUsingSpecificCriteria(criteria,fileName,formatting=null){
             }else{
                 return collectedMatch;
             }
-    }catch(err){
-        switch(err.message){
-            case "1":
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: Criteria must be a string.\n--- ')
-            case "2":
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: FileName must be a string.\n--- ');
-            case "3":
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: file name does not have an extension.\n--- ')
-            case "5":
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: Criteria is not a valid regular expression.\n--- ')
-            case "7": 
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: Match not found.\n--- ')
-            case "8":
-                throw new Error('--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: formatting function output is empty\n--- ');
-            default:
-                throw new Error(`--Error--\nFile name: editProgram.js\nLocation: findAllUsingSpecificCriteria\nStatus: UNKNOWN ERROR: -> ${err.message}\n`)
-        }
-    }
+    
     
 }
 
 async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
-
+    
     if(typeof beginningTarget !== "string"){
         throw new Error("beginning target parameter is not a string");
     }
@@ -311,28 +270,34 @@ async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
     if(!fileName.includes('.')){
         throw new Error("fileName parameter does not have a file extension");
     }
-
+    
     const fileContent = await fs.readFile(fileName,'utf8');
     
     const convertToArray = fileContent.split('\n');
+    console.log("CHECKING: ",beginningTarget, endingTarget)
+    console.log("CHECKING CONVERTING TO ARRAY: ",convertToArray)
+
+    
     const length = convertToArray.length;
     let beginningIndex = null;
     let endingIndex = null;
 
-
+    
     // Find the index of begining and end
     for(let i = 0;i < length;i++){
         const currentLine = convertToArray[i];
-        if(currentLine === beginningTarget){
+        const convertBeginningNewLineSymbol = convertNewLineSymbolBasedOnOS(beginningTarget);
+        const convertEndingNewLineSymbol = convertNewLineSymbolBasedOnOS(endingTarget)
+        if(currentLine === convertBeginningNewLineSymbol){
             beginningIndex = i;
         }
-        if(currentLine === endingTarget){
+        if(currentLine === convertEndingNewLineSymbol){
             endingIndex = i;
             break;
         }
     }
+    console.log("CHECK BEGINNING AND ENDNG: ",beginningIndex,endingIndex)
     
-
     // error checking
     if(beginningIndex === null || endingIndex === null){
         throw new Error("Beginning target and ending target parameters are not properly set or does not exist.");
@@ -379,7 +344,7 @@ async function retrieveFileContent(fileName){
             throw new Error("No files specified");
         }
         // Check if file exists
-        await fs.access(fileName, fs.constants.F_OK);
+        // await fs.access(fileName, fs.constants.F_OK);
         const outcome = await fs.readFile(fileName,'utf8');
         return outcome;
     
@@ -405,6 +370,41 @@ function countLeadingSpacesInLine(line) {
     const matches = line.match(leadingSpacesPattern);
     return matches ? matches[0].length : 0;
 
+}
+function convertNewLineSymbolBasedOnOS(string){
+    
+    const osType = os.platform().toLowerCase();
+    const length = string.length;
+    if(length<2){
+        throw new Error("String length is too short");
+    }
+    const ending = string.slice(length-3,length);
+    // console.log(string,": ",ending)
+    console.log(ending)
+    // The problem is that it could not sense if there was a new lne character or not. When I run the console.log at each part, I saw that no new line character showed up after extracting the last two characters
+    if(ending!=="\n" || ending !== "\r"){
+        console.log("DID IT RETURN?")
+        return string;
+    }
+    if(osType.includes("win")){
+        console.log("WINDOWS")
+        if(ending === "\r"){
+            return string;
+        }
+        if(ending === "\n"){
+            return string.splice(0,length-2) + '\r'
+        }
+    }
+    if(osType.includes("mac")){
+        console.log("MAC")
+        if(ending === "\r"){
+            return string.splice(0,length-2) + '\n'
+        }
+        if(ending === "\n"){
+            return string
+        }
+    }
+    throw new Error("OS is not windows nor mac")
 }
 /* ---SUPPORT FUNCTIONS--- */
 
