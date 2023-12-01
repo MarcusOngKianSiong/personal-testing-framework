@@ -5,25 +5,25 @@ const {
     replaceEntireFileContent, 
     retrieveFileContent,
     appendToFile
-} = require('./Module_fileManipulation/editProgram.js')
-const path = require('path')
+} = require('../Module_fileManipulation/editProgram.js');
+const path = require('path');
 
 describe("file manipulation: functional correctness",()=>{
     // You pass me a function to run all the it cases. 
     // However, how do I make sure that these it cases attaches itself to the describe?
 
     it("retrieve the contents of a file",async ()=>{
-        const fileName = path.join(__dirname,"sampleFiles","retrieveDataFromFiles.js")
+        const fileName = path.join(__dirname,"..","sampleFiles","retrieveDataFromFiles.js");
         const outcome = await retrieveFileContent(fileName);
-        const expected = 'Hello there'
+        const expected = 'Hello there';
         expect(outcome).toBe(expected);
     })
-
+    
     it("replace entire file content",async ()=>{
         // function name: replaceEntireFileContent
         // const fileName = '../TestCases_fileManipulation/sampleFiles/replaceEntireContent.js'
         // const fileName = '../TestCases_fileManipulation/sampleFiles/replaceEntireContent.js'
-        const fileName = path.join(__dirname,"sampleFiles","replaceEntireContent.js")
+        const fileName = path.join(__dirname,"..","sampleFiles","replaceEntireContent.js")
         const data = 'something here';
         await replaceEntireFileContent(data,fileName);
         const outcome = await retrieveFileContent(fileName);
@@ -32,7 +32,7 @@ describe("file manipulation: functional correctness",()=>{
     })
     
     it("find all lines that have the string inside",async ()=>{
-        const fileName = path.join(__dirname,"sampleFiles","findAllLinesWithSpecificText.js");
+        const fileName = path.join(__dirname,"..","sampleFiles","findAllLinesWithSpecificText.js");
         const outcome = await findAllUsingSpecificCriteria('Hello',fileName);
         const expected = ["Hello","Hello","Helloooooo"];
         let status = true;
@@ -57,21 +57,28 @@ describe("file manipulation: functional correctness",()=>{
     // })
     
     it("Retrieve specific section in a file",async ()=>{
-        const beginningTarget = "// Hello\n"
-        const endingTarget = "// Goodbye\r"
+
+        // NOTE!!! -> I do not need to explicitly state the next line character in targets.
+        //                  - I split by new line, so any new line character in the target parameter will mean nothing will be found. 
+        
+        const beginningTarget = "// Hello"
+        const endingTarget = "// Goodbye"
         const expected = 'muffy\npuffy\ntuffy'
-        console.log("SOMETHING: ",__dirname)
-        const fileName = path.join(__dirname,"sampleFiles","retrieveSpecificSection.js");
+        
+        const fileName = path.join(__dirname,"..","sampleFiles","retrieveSpecificSection.js");
+        
         const outcome = await retrieveSpecificSection(fileName,beginningTarget,endingTarget);
-        retrieveSpecificSection()
+        
         expect(outcome).toBe(expected);
     })
+
+    
 
     it("append content to file",async ()=>{
         const original = "something\nnothing\nhello\ngoodbye";
         const input = "what\nis\nthere?"
         const expected = "something\nnothing\nhello\ngoodbye\nwhat\nis\nthere?";
-        const fileName = path.join(__dirname,"sampleFiles","appendContentToFile.js");
+        const fileName = path.join(__dirname,"..","sampleFiles","appendContentToFile.js");
         await appendToFile(fileName,input,true);
         const outcome = await retrieveFileContent(fileName);
         await replaceEntireFileContent(original,fileName);

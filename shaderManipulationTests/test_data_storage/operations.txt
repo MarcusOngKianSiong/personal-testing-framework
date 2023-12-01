@@ -6,7 +6,7 @@ float scaledX = a_position.x/scalerX;
 float scaledY = a_position.y/scalerY;
 // 
 gl_Position = vec4(scaledX,scaledY,0.0,1.0);
---- standard -> vertex ---
+--- standard -> vertex : end ---
 
 --- standard -> fragment ---
 gl_FragColor = u_color;

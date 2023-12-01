@@ -1,7 +1,14 @@
+/* ---TITLE--- */
+random
+/* ---TITLE--- */
+
+
 /* -------- VERTEX SHADER VARIABLES -------- */
 attribute vec2 a_position;
 varying vec2 current_fragment_position;
 /* -------- VERTEX SHADER VARIABLES -------- */
+
+
 /* -------- VERTEX SHADER OPERATIONS -------- */
 void main(){
     // Scaler
@@ -12,6 +19,8 @@ void main(){
     current_fragment_position = vec2(a_position.x,a_position.y);
 }
 /* -------- VERTEX SHADER OPERATIONS -------- */
+
+
 /* -------- FRAGMENT SHADER VARIABLES -------- */
 precision mediump float;
 uniform vec4 default_color;
@@ -22,6 +31,7 @@ uniform float shape_width;
 uniform float shape_height;
 varying vec2 current_fragment_position;  // Shows current fragment
 /* -------- FRAGMENT SHADER VARIABLES -------- */
+
 /* -------- FRAGMENT SHADER OPERATIONS -------- */
 void main() {
     float blockWidth = shape_width/number_of_columns;

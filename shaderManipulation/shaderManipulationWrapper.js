@@ -1,4 +1,13 @@
-const {insertTextIntoSpecificFileSection,findAllUsingSpecificCriteria,replaceEntireFileContent, retrieveFileContent,appendToFile} = require('../Module_fileManipulation/editProgram.js');
+const {
+    insertTextIntoSpecificFileSection,
+    findAllUsingSpecificCriteria,
+    replaceEntireFileContent, 
+    retrieveFileContent,
+    retrieveSpecificSection,
+    appendToFile,
+} = require('../Module_fileManipulation/editProgram.js');
+module.exports = {spaceSeparatedStringToCommaSeparatedString}
+
 const path = require('path'); 
 
 
@@ -273,7 +282,7 @@ class shaderManagement{
                 }
             }
         }
-
+        
         // Step 4: Check if there is any error in the sectionString indexes
         /*
             Examples of errors:
@@ -324,6 +333,7 @@ class shaderManagement{
                         3.3.1 Throw an error if that is the case.
         */
         /*2. */ for(const CurrentCheckingSectionStringName in indexesOfCriteria){
+            
             const check = indexesOfCriteria[CurrentCheckingSectionStringName];
             for(const checkAgainstSectionStringName in indexesOfCriteria){
                 if(checkAgainstSectionStringName !== CurrentCheckingSectionStringName){
@@ -390,93 +400,131 @@ class shaderManagement{
         this.functionalityStorageLocation = functionality;
     }
 
-    // Checkers
-    isObjectEmpty(obj) {
-        for (const key in obj) {
-            if (obj.hasOwnProperty(key)) {
-                return false; // Object has at least one property, not empty
+    /* --- CHECKERS --- */
+        // CHECK operations
+            isObjectEmpty(obj) {
+                for (const key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        return false; // Object has at least one property, not empty
+                    }
+                }
+                return true; // Object has no properties, it's empty
             }
-        }
-        return true; // Object has no properties, it's empty
-    }
-        // Check if the content has the split formatting
-    checkInterfaceContentFormatting(content){
-        if(typeof content !== "string"){
-            throw new Error("content parameter is not a string");
-        }
-        // Does it explicity state the sections by shaders? -> /* --vertex shader-- */, /* --fragment shader-- */ 
-        for(const key in this.interfaceSectionSplit){
-            if(!content.includes(this.interfaceSectionSplit[key])){
-                throw new Error(`'${this.interfaceSectionSplit[key]}' section formatting line not found in content`)
-            }
-        }
-        return true
-    }
-    checkContentSectionSplitAvailability(){
-        if(this.interfaceSectionSplit === null || this.isObjectEmpty(this.interfaceSectionSplit)){
-            throw new Error("interface section split criteria is not properly set")
-        }
-        return true;
-    }
-    checkInterfaceLocationAvailability(theInterface){
-        if(typeof theInterface !== "string"){
-            throw new Error(`parameter is not a string`);
-        }
-        if(theInterface === "edit"){
-            if(this.editFunctionalityInterfaceLocation !== null){
+                // Check if the content has the split formatting
+            checkInterfaceContentFormatting(content){
+                if(typeof content !== "string"){
+                    throw new Error("content parameter is not a string");
+                }
+                // Does it explicity state the sections by shaders? -> /* --vertex shader-- */, /* --fragment shader-- */ 
+                for(const key in this.interfaceSectionSplit){
+                    if(!content.includes(this.interfaceSectionSplit[key])){
+                        throw new Error(`'${this.interfaceSectionSplit[key]}' section formatting line not found in content`)
+                    }
+                }
                 return true
-            }else{
-                return false
             }
-        }else if(theInterface === "new"){
-            if(this.newFunctionalityInterfaceLocation !== null){
+            checkContentSectionSplitAvailability(){
+                if(this.interfaceSectionSplit === null || this.isObjectEmpty(this.interfaceSectionSplit)){
+                    throw new Error("interface section split criteria is not properly set")
+                }
+                return true;
+            }
+            checkInterfaceLocationAvailability(theInterface){
+                if(typeof theInterface !== "string"){
+                    throw new Error(`parameter is not a string`);
+                }
+                if(theInterface === "edit"){
+                    if(this.editFunctionalityInterfaceLocation !== null){
+                        return true
+                    }else{
+                        return false
+                    }
+                }else if(theInterface === "new"){
+                    if(this.newFunctionalityInterfaceLocation !== null){
+                        return true
+                    }else{
+                        return false
+                    }
+                }else{
+                    throw new Error(`${theInterface} interface does not exist`)
+                }
+            }
+            checkRawFileContent(){
+                if(this.rawFileContent === null){
+                    return false
+                }else{
+                    return true
+                }
+            }
+            isStringAFileName(fileName){
+                
+                    const regex = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
+                    return regex.test(fileName);
+                    
+                /*
+                    Possible outcomes: 
+                        1. There are no "/"
+                        2. The end string after the last "/" is empty
+                        3. The end string after the last "/" is just a word with no "."
+                        4. The end string after the last "/" has ".", but it is at the beginning of the string
+                        5. The end string after the last "/" has ".", bu
+                */
+            }
+            doesRoutePointToAFile(route){
+                if(typeof route !== "string"){
+                    throw new Error("route parameter is not a string")
+                }
+                const splittedRoute = route.split('/');
+                const outcome = this.isStringAFileName(splittedRoute[splittedRoute.length-1]);
+                if(outcome){
+                    return true
+                }else{
+                    return false;
+                }
+            }
+            isStorageLocationsAvailable(){
+                if(this.variablesStorageLocation === null || this.operationsStorageLocation === null || this.functionalityStorageLocation === null){
+                    return false
+                }
                 return true
-            }else{
-                return false
             }
-        }else{
-            throw new Error(`${theInterface} interface does not exist`)
-        }
-    }
-    checkRawFileContent(){
-        if(this.rawFileContent === null){
-            return false
-        }else{
-            return true
-        }
-    }
-    isStringAFileName(fileName){
-        
-            const regex = /^[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*$/;
-            return regex.test(fileName);
-            
-        /*
-            Possible outcomes: 
-                1. There are no "/"
-                2. The end string after the last "/" is empty
-                3. The end string after the last "/" is just a word with no "."
-                4. The end string after the last "/" has ".", but it is at the beginning of the string
-                5. The end string after the last "/" has ".", bu
-        */
-    }
-    doesRoutePointToAFile(route){
-        if(typeof route !== "string"){
-            throw new Error("route parameter is not a string")
-        }
-        const splittedRoute = route.split('/');
-        const outcome = this.isStringAFileName(splittedRoute[splittedRoute.length-1]);
-        if(outcome){
-            return true
-        }else{
-            return false;
-        }
-    }
-    isStorageLocationsAvailable(){
-        if(this.variablesStorageLocation === null || this.operationsStorageLocation === null || this.functionalityStorageLocation === null){
-            return false
-        }
-        return true
-    }
+
+        // CHECK file content
+            async doesFunctionalityExist(functionality){
+                if(this.functionalityStorageLocation === null){
+                    throw new Error("Functionality storage file location does not exist")
+                }
+                if(typeof functionality !== "string"){
+                    throw new Error("Functionality parameter is not a string")
+                }
+                const outcome = await retrieveFileContent(this.functionalityStorageLocation);
+                const convertToArray = outcome.split('\n');
+                const length = convertToArray.length;
+                if(length === 0){
+                    return false
+                }
+                for(let i = 0;i<length;i++){
+                    if(convertToArray[i] === functionality){
+                        return true
+                    }
+                }
+                return false;
+            }
+            async isFunctionalityEmpty(functionality){
+                /* 
+                    Look at both the variable storage file and the operations storage file to see if there is any content tied to functionality
+
+                */
+                if(!this.isStorageLocationsAvailable()){
+                    throw new Error("Cannot find storage location")
+                }
+                const variables = await this.findVariables(functionality);
+                const func = await retrieveFileContent(this.functionalityStorageLocation);
+                const operations = await retrieveFileContent(this.operationsStorageLocation);
+                
+
+            }
+
     // Getters
     getSectionContent(){
         return this.sectionContent
@@ -496,7 +544,91 @@ class shaderManagement{
     getRawFileContent(){
         return this.rawFileContent;
     }
-    
+    /**
+     * @param {*} functionality
+     * @param {boolean} [shader=false]
+     * @param {boolean} [name=false]
+     * @returns {obj} {}
+     * @memberof shaderManagement
+     */
+    async findVariables(functionality, shader="both", name=""){
+
+        if(!functionality){
+            throw new Error("Functionality parameter is empty")
+        }
+
+        /* 
+            How do I want to find the variables?
+                You can choose the conditions you want to use. (Max 3);
+
+                Each condition specified will form the very regex itself.
+                Each condition not specified will use a wildcard regex (Except for the first);
+        */
+
+        // Step 1: Identify the regex pattern for two parameters
+        const shaderRegex = shader === "" ? "\\w+" : shader;
+        const nameRegex = name === "" ? "\\w+" : name;
+
+        // Step 1: Construct the regex based on parameters
+        const constructingRegexForASingleRow = new RegExp(`^${functionality},${shaderRegex},[a-z0-9]+,[a-z0-9]+,${nameRegex}$`);
+        
+        // Step 2: Extract variable file content
+        const variables = await retrieveFileContent(this.variablesStorageLocation);
+
+        // Step 3: Convert the contents into an array based on next lines
+        const convertToArray = variables.split('\n');
+
+        // Step 4: Find the lines that match the regex
+        const length = convertToArray.length;
+        const foundVariables = [];
+        for(let i = 0;i<length;i++){
+            const currentVariable = convertToArray[i];
+            if(constructingRegexForASingleRow.exec(currentVariable)){
+                foundVariables.push(currentVariable);
+            }
+        }
+        
+        if(foundVariables.length === 0){
+            return false;
+        }
+
+        return foundVariables;
+
+    }
+    /**
+     * @abstract Return the code relating to shader main functions based on functionality
+     * 
+     * @param {string} functionality
+     * @param {string} shader -> Possible input: "Both", "vertex", "fragment"
+     * @returns {object} {vertex: "", fragment: ""}
+     * @memberof shaderManagement
+     */
+    async findOperations(functionality,shader="Both"){
+        
+        if(typeof functionality !== "string"){
+            throw new Error("functionality parameter is not a string")
+        }
+
+        const sectionToLookFor = []
+
+        if(shader === "Both"){
+            sectionToLookFor.push(`--- ${functionality} -> vertex ---`);
+            sectionToLookFor.push(`--- ${functionality} -> fragment ---`);
+        }else if(shader === "vertex"){
+            sectionToLookFor.push(`--- ${functionality} -> vertex ---`);
+        }else if(shader === "fragment"){
+            sectionToLookFor.push(`--- ${functionality} -> fragment ---`);
+        }else{
+            throw new Error("shader type does not exist")
+        }
+
+        for(let i = 0;i<sectionToLookFor.length;i++){
+            const specificSections = await retrieveSpecificSection(this.operationsStorageLocation,sectionToLookFor[i],sectionToLookFor[i]);    
+            
+        }
+        
+
+    }
     // Basic functionality
     /**
      *  @note
@@ -536,23 +668,50 @@ class shaderManagement{
      * @abstract Take the array of shader variable declaration and turn it into a comma separated string and post it up to the respective files in data_storage
      * @format 
      * @memberof shaderManagement
+     *  @Note
      */
     async addShaderVariablesToDataStorage(){
+        
+        /*
+            Note: If you execute this, you should have the core components in this format
+
+                const expected = {
+                    title: ['random'],
+                    vertexShaderVariables: ['attribute vec2 a_position;',],
+                    vertexShaderOperations: ['void main(){','}',],
+                    fragmentShaderVariables: ['precision mediump float;',],
+                    fragmentShaderOperations: ['void main() {','}',]
+                }
+                
+                Expected outcome:
+                    random,vertex,attribute,vec2,a_position
+                    random,vertex,varying,vec2,current_fragment_position
+                    random,fragment,precision,mediump,float
+                    random,fragment,uniform,vec4,default_color
+                    random,fragment,uniform,vec4,grid_color
+                    random,fragment,uniform,float,number_of_rows
+                    random,fragment,uniform,float,number_of_columns
+                    random,fragment,uniform,float,shape_width
+                    random,fragment,uniform,float,shape_height
+                    random,fragment,varying,vec2,current_fragment_position
+
+        */
         if(this.sectionContent === null){
             throw new Error("sectionContent is empty. Therefore, no variable to store");
         }
-        let stringing = '';
-        console.log("CHECK SECTION CONTENT: ",this.sectionContent)
-        for(const section in this.sectionContent){
-            console.log(section, ": ",section.includes('variable'));
-            if(section.includes('Variable')){
-                console.log("ENTERING!!!! -> ",section)
-                stringing += this.convertVariablesToCommaSeparated(this.sectionContent[section]);
-            }
-        }
-        // console.log("CHECKING DAM IT: ",stringing.substring(0,stringing.length-1))
-        await appendToFile(this.variablesStorageLocation,stringing.substring(0,stringing.length-1),true);
-        return true;
+
+        // step 1: Extract all the variable key value pair
+        const vertexShaderVariables = this.sectionContent["vertexShaderVariables"];
+        const fragmentShaderVariables = this.sectionContent["fragmentShaderVariables"];
+        const title = this.sectionContent["title"][0];
+        
+        // step 2: Turn each item into the comma separated string version
+        const vertex = spaceSeparatedStringToCommaSeparatedString([title,"vertex"],3,vertexShaderVariables);
+        const fragment = spaceSeparatedStringToCommaSeparatedString([title,"fragment"],3,fragmentShaderVariables);
+        const final = "\n"+vertex+'\n'+fragment;
+        await appendToFile(this.variablesStorageLocation,final,false)
+        
+        return true
     }
     splitOneVariable(variableString){
         
@@ -576,9 +735,26 @@ async function addNewFunctionality(name){
     await insertTextIntoSpecificFileSection(areaStart,areaEnd,template,fileName); 
 }
 
-async function addNewVariable(){
-
+function spaceSeparatedStringToCommaSeparatedString(arrayValuesToAppend,NumberOfItemsToKeepFromStart,arr){
+    
+    const length = arr.length;
+    const lengthOfItemsToAppend = arrayValuesToAppend.length;
+    const data = []
+    for(let i = 0;i<length;i++){
+        const removeSemiColon = arr[i].replace(";"," ");
+        const splitBySpace = removeSemiColon.split(" ");
+        const isolateTheValues = splitBySpace.slice(0,NumberOfItemsToKeepFromStart);
+        const combined = arrayValuesToAppend.concat(isolateTheValues);
+        const joinedByComma = combined.join(",");
+        data.push(joinedByComma)
+    }
+    const joinedArray = data.join("\n");
+    
+    return joinedArray;
+    // I must convert it to string format
 }
 
 // addNewFunctionality("Hello")
 global.shaderProcessing = new shaderManagement()
+
+

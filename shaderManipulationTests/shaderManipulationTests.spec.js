@@ -54,6 +54,7 @@ const functionality = path.join(__dirname,'test_data_storage','functionality.txt
 const operations = path.join(__dirname,'test_data_storage','operations.txt');
 // Interface content section indicator
 const criteria = {
+    title: '/* ---TITLE--- */',
     vertexShaderVariables: '/* -------- VERTEX SHADER VARIABLES -------- */',
     fragmentShaderVariables: '/* -------- FRAGMENT SHADER VARIABLES -------- */',
     vertexShaderOperations: '/* -------- VERTEX SHADER OPERATIONS -------- */',
@@ -63,7 +64,6 @@ const criteria = {
 
 
 describe('shader manipulation',()=>{
-
     // Store interface location 
     it('store edit interface location',()=>{
         shaderProcessing.setInterfaceLocation('edit',editInterfaceLocation);
@@ -75,7 +75,7 @@ describe('shader manipulation',()=>{
         const outcome = shaderProcessing.getInterfaceLocation('new');
         expect(outcome).toBe(newInterfaceLocation);
     })
-    
+
     // store storage location
     it('STORE STORAGE LOCATION',()=>{
         shaderProcessing.setStorageLocation(variableStorage,operations,functionality);
@@ -97,13 +97,21 @@ describe('shader manipulation',()=>{
         }
         expect(status).toBe(true)
     })
-
+    
     // Steps in management execution
     it('extract file content from interface into rawFileContent variable',async ()=>{
-        const expected = `/* -------- VERTEX SHADER VARIABLES -------- */
+        
+        const expected = `/* ---TITLE--- */
+random
+/* ---TITLE--- */
+
+
+/* -------- VERTEX SHADER VARIABLES -------- */
 attribute vec2 a_position;
 varying vec2 current_fragment_position;
 /* -------- VERTEX SHADER VARIABLES -------- */
+
+
 /* -------- VERTEX SHADER OPERATIONS -------- */
 void main(){
     // Scaler
@@ -114,6 +122,8 @@ void main(){
     current_fragment_position = vec2(a_position.x,a_position.y);
 }
 /* -------- VERTEX SHADER OPERATIONS -------- */
+
+
 /* -------- FRAGMENT SHADER VARIABLES -------- */
 precision mediump float;
 uniform vec4 default_color;
@@ -124,6 +134,7 @@ uniform float shape_width;
 uniform float shape_height;
 varying vec2 current_fragment_position;  // Shows current fragment
 /* -------- FRAGMENT SHADER VARIABLES -------- */
+
 /* -------- FRAGMENT SHADER OPERATIONS -------- */
 void main() {
     float blockWidth = shape_width/number_of_columns;
@@ -146,8 +157,11 @@ void main() {
         
         expect(outcome).toBe(expected);
     })
+
     it(`extract section from rawFileContent variable`,()=>{
+        
         const expected = {
+            title: ['random'],
             vertexShaderVariables: [
               'attribute vec2 a_position;',
               'varying vec2 current_fragment_position;',
@@ -189,13 +203,14 @@ void main() {
               '    }',
               '}',
             ]
-          }
+        }
+        
         shaderProcessing.splitContentIntoComponentsAndSetSectionContent()
         const sectionContent = shaderProcessing.getSectionContent();
-        // console.log(outcome)
         const outcome = object_equal(sectionContent,expected);
         // console.log("checking: ",array_equal([1,2,3],[1,2,3]))
         expect(outcome).toBe(true);
+
     })
     it('Can the variables split properly? (Comma separated values)',()=>{
         /* 
@@ -215,80 +230,46 @@ void main() {
         const outcome = shaderProcessing.convertVariablesToCommaSeparated(data);
         expect(outcome).toBe(expected)
     })
-    it('Add the variables into the file',async ()=>{
+    
+    it('Add the variables into data storage (variables.js)',async ()=>{
         /* 
             Layers to check:
                 1. Is append function working?
-                2. 
             What am I working with here?
-
         */
-        const initialState = `standard,vertex,attribute,vec2,a_position
-standard,fragment,uniform,vec4,u_color
-grid,vertex,attribute,vec2,a_position
-grid,vertex,varying,vec2,current_fragment_position
-grid,fragment,varying,vec2,current_fragment_position
-grid,fragment,precision,mediump,float
-grid,fragment,uniform,vec4,default_color
-grid,fragment,uniform,vec4,grid_color
-grid,fragment,uniform,float,number_of_rows
-grid,fragment,uniform,float,number_of_columns
-grid,fragment,uniform,float,shape_width
-grid,fragment,uniform,float,shape_height
-border,vertex,attribute,vec2,a_position
-border,vertex,varying,vec2,current_position
-border,fragment,precision,mediump,float
-border,fragment,varying,vec2,current_position
-border,fragment,uniform,float,xLeft
-border,fragment,uniform,float,xRight
-border,fragment,uniform,float,yTop
-border,fragment,uniform,float,yBottom
-border,fragment,uniform,vec2,width
-border,fragment,uniform,float,border_size
-border,fragment,uniform,vec4,border_color`;
-        const expected = `standard,vertex,attribute,vec2,a_position
-standard,fragment,uniform,vec4,u_color
-grid,vertex,attribute,vec2,a_position
-grid,vertex,varying,vec2,current_fragment_position
-grid,fragment,varying,vec2,current_fragment_position
-grid,fragment,precision,mediump,float
-grid,fragment,uniform,vec4,default_color
-grid,fragment,uniform,vec4,grid_color
-grid,fragment,uniform,float,number_of_rows
-grid,fragment,uniform,float,number_of_columns
-grid,fragment,uniform,float,shape_width
-grid,fragment,uniform,float,shape_height
-border,vertex,attribute,vec2,a_position
-border,vertex,varying,vec2,current_position
-border,fragment,precision,mediump,float
-border,fragment,varying,vec2,current_position
-border,fragment,uniform,float,xLeft
-border,fragment,uniform,float,xRight
-border,fragment,uniform,float,yTop
-border,fragment,uniform,float,yBottom
-border,fragment,uniform,vec2,width
-border,fragment,uniform,float,border_size
-border,fragment,uniform,vec4,border_color
-precision,mediump,float
-uniform,vec4,default_color
-uniform,vec4,grid_color
-uniform,float,number_of_rows
-uniform,float,number_of_columns
-uniform,float,shape_width
-uniform,float,shape_height
-varying,vec2,current_fragment_position`;
+            const initial = await retrieveFileContent(variableStorage);
+            const additionalVariables = `random,vertex,attribute,vec2,a_position
+random,vertex,varying,vec2,current_fragment_position
+random,fragment,precision,mediump,float
+random,fragment,uniform,vec4,default_color
+random,fragment,uniform,vec4,grid_color
+random,fragment,uniform,float,number_of_rows
+random,fragment,uniform,float,number_of_columns
+random,fragment,uniform,float,shape_width
+random,fragment,uniform,float,shape_height
+random,fragment,varying,vec2,current_fragment_position`
+        const expected = initial+'\n'+additionalVariables;
+        
         await shaderProcessing.addShaderVariablesToDataStorage()
         const outcome = await retrieveFileContent(variableStorage);
+        await replaceEntireFileContent(initial,variableStorage);
         
-        console.log("ACTUAL OUTCOME:")
-        splittingAndShowing(outcome)
-        console.log("----------")
-        console.log("EXPECTED:")
-        splittingAndShowing(expected)
-        // await replaceEntireFileContent(initialState,variableStorage);
         expect(outcome).toBe(expected);
 
     })
+
+    it('find variable',async ()=>{
+        const functionality = "grid"
+        const shader = "vertex"
+        const name = "current_fragment_position";
+        const expected = ["grid,fragment,varying,vec2,current_fragment_position"];
+        const arr = await shaderProcessing.findVariables(functionality,shader,name);
+        const outcome = array_equal(expected,arr);
+        console.log(arr);
+        expect(outcome).toBe(true);
+        
+    })
+
 })
 
 

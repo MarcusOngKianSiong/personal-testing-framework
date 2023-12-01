@@ -18,7 +18,6 @@ global.array_equal = function(a1,a2,orderConsideration=true){
     return true
 }
 
-
 global.object_equal = function (object1,object2){
     const object1_keys = Object.keys(object1);
     const object2_keys = Object.keys(object2);
@@ -45,3 +44,63 @@ global.object_equal = function (object1,object2){
     return true
 }
 
+global.displayDifferenceBetweenLinesInStrings = function(string1,string2){
+    string1 = string1.split('\n');
+    string2 = string2.split('\n');
+
+    const string1Length = string1.length;
+    const string2Length = string2.length;
+    let coreLooper = null;
+    if(string1Length>string2Length){
+        coreLooper = string1Length;        
+    }else{
+        coreLooper = string2Length;
+    }
+    
+    const errors = {}
+    for(let i = 0;i<coreLooper;i++){
+        if(string1[i] === string2[i]){
+            continue;
+        }
+        
+        errors[i] = locateIndexAreaOfDifferenceBetweenTwoStrings(string1[i],string2[i]);
+    }
+
+    console.log("---CHECKING DIFFERENCE---")
+    for(const lineNumber in errors){
+        console.log(lineNumber,": ",errors[lineNumber])
+    }
+    console.log("---Checking difference end---")
+}
+
+function locateIndexAreaOfDifferenceBetweenTwoStrings(string1, string2){
+    if(string1 === undefined || string2 === undefined){
+        return undefined
+    }
+    const string1Length = string1.length;
+    const string2Length = string2.length;
+    
+    let longer = string1Length>string2Length ? string1Length : string2Length;
+    
+    let startIndex = null;
+    let endIndex = null;
+    for(let i = 0;i<longer;i++){
+        if(string1[i] !== string2[i] && startIndex === null){
+            startIndex = i;
+        }
+        if(string1[i] !== string2[i] && startIndex !== null){
+            endIndex = i;
+        }
+    }
+
+    if(endIndex === null){
+        endIndex = startIndex
+    }
+
+    if(startIndex === null){
+        return false
+    }
+
+    return startIndex === endIndex ? [startIndex] : [startIndex,endIndex];
+
+}

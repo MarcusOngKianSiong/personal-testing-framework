@@ -4,12 +4,17 @@ const filePath = 'testing.js'; // Replace with the path to your file
 const os = require('os');
 
 module.exports = {
+    // CORE FUNCTIONS
     insertTextIntoSpecificFileSection,
     findAllUsingSpecificCriteria,
     replaceEntireFileContent, 
     retrieveFileContent,
     retrieveSpecificSection,
-    appendToFile
+    appendToFile,
+    // SUPPORTING FUNCTIONS
+    isRegExpString,
+    countLeadingSpacesInLine,
+    convertNewLineSymbolBasedOnOS
 }
 
 /*
@@ -19,9 +24,9 @@ module.exports = {
                     // add variables
                     void main(){
                         // add operations
-
                     }
             `
+            
             - add -> fragment: `
                     // add variables
                     void main() {
@@ -274,20 +279,18 @@ async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
     const fileContent = await fs.readFile(fileName,'utf8');
     
     const convertToArray = fileContent.split('\n');
-    console.log("CHECKING: ",beginningTarget, endingTarget)
-    console.log("CHECKING CONVERTING TO ARRAY: ",convertToArray)
-
     
     const length = convertToArray.length;
     let beginningIndex = null;
     let endingIndex = null;
 
+    // Ensure Input next line character matches the operating system
+    const convertBeginningNewLineSymbol = convertNewLineSymbolBasedOnOS(beginningTarget);
+    const convertEndingNewLineSymbol = convertNewLineSymbolBasedOnOS(endingTarget);
     
     // Find the index of begining and end
     for(let i = 0;i < length;i++){
         const currentLine = convertToArray[i];
-        const convertBeginningNewLineSymbol = convertNewLineSymbolBasedOnOS(beginningTarget);
-        const convertEndingNewLineSymbol = convertNewLineSymbolBasedOnOS(endingTarget)
         if(currentLine === convertBeginningNewLineSymbol){
             beginningIndex = i;
         }
@@ -296,7 +299,6 @@ async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
             break;
         }
     }
-    console.log("CHECK BEGINNING AND ENDNG: ",beginningIndex,endingIndex)
     
     // error checking
     if(beginningIndex === null || endingIndex === null){
@@ -308,14 +310,13 @@ async function retrieveSpecificSection(fileName, beginningTarget,endingTarget){
     if((endingIndex - beginningIndex) === 1){
         throw new Error("There is nothing between the target parameters");
     }
-
+    
     // Extract the section from the array of lines (from original file)
     const sectionContent = convertToArray.slice(beginningIndex + 1,endingIndex);
     
-
     // Re-combine the section array into a string and return it. 
     return sectionContent.join('\n');
-
+    
 }
 
 async function appendToFile(fileName, content,nextLine=false){
@@ -369,46 +370,45 @@ function countLeadingSpacesInLine(line) {
     const leadingSpacesPattern = /^ +/; // Regular expression for leading spaces
     const matches = line.match(leadingSpacesPattern);
     return matches ? matches[0].length : 0;
-
 }
 function convertNewLineSymbolBasedOnOS(string){
-    
+    // darwin = win
     const osType = os.platform().toLowerCase();
     const length = string.length;
     if(length<2){
         throw new Error("String length is too short");
     }
-    const ending = string.slice(length-3,length);
-    // console.log(string,": ",ending)
-    console.log(ending)
-    // The problem is that it could not sense if there was a new lne character or not. When I run the console.log at each part, I saw that no new line character showed up after extracting the last two characters
-    if(ending!=="\n" || ending !== "\r"){
-        console.log("DID IT RETURN?")
+
+    // 2. Check if there is even any new line character at the end in the first place
+    const outcome = /^.+(\n|\r)$/.exec(string);
+    if(outcome === null){
         return string;
     }
-    if(osType.includes("win")){
-        console.log("WINDOWS")
-        if(ending === "\r"){
-            return string;
+    
+    if(osType === "win32"){
+        const windowsNextLineFormat = /^.+(\r)$/.exec(string)
+        if(windowsNextLineFormat === null){                         // If new line format is not "\r" (Only possibility is that it is \n because of step 2.)
+            // Replace the new line character with \r instead. 
+            const replacedVersion = string.replace(/\n/,"\r")
+            return replacedVersion;
         }
-        if(ending === "\n"){
-            return string.splice(0,length-2) + '\r'
-        }
+        return string;
     }
-    if(osType.includes("mac")){
-        console.log("MAC")
-        if(ending === "\r"){
-            return string.splice(0,length-2) + '\n'
+    
+    if(osType === "darwin"){
+        const MacNextLineFormat = /^.+(\n)$/.exec(string);
+        if(MacNextLineFormat === null){
+            const replacedVersion = string.replace(/\r/,"\n");
+            return replacedVersion;
         }
-        if(ending === "\n"){
-            return string
-        }
+        return string;
     }
-    throw new Error("OS is not windows nor mac")
+    // console.log(string,": ",ending)
+    // The problem is that it could not sense if there was a new lne character or not. When I run the console.log at each part, I saw that no new line character showed up after extracting the last two characters
+    throw new Error("Something went wrong when changing new line character"); 
 }
+
 /* ---SUPPORT FUNCTIONS--- */
-
-
 
 const name = "something"
 const data = `
