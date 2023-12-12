@@ -14,12 +14,24 @@
             - 
 */
 
-// SETUP
-require('./testStructure.js');
-require('./testStatus.js');
 
+// SETUP
+require('./testStructure.js');      // Produce the functionality for writing test cases
+require('./testStatus.js');         // Produce the test outcome message
+require('./checkingTools.js');      // Tools that you can use in your test case
+require('./automationTools.js')
 // Run test cases
-require('../testCases.spec.js')
+
+
+const data = findAllFiles('.spec.js');
+const length = data.length;
+for(let i = 0;i<length;i++){
+    require(data[i]);
+}
+// require('/Users/marcus/Desktop/testArea/personalTestingFramework/shaderManipulationTests/supportFunctionTests.spec.js')
+// require('../TestCases_fileManipulation/supportingFunctions.spec.js');
+// require('../TestCases_fileManipulation/coreFunctions.spec.js')
+// require('../shaderManipulationTests/shaderManipulationTests.spec.js')
 
 // Package, analyse, and show test results
 unpackSpecifications()
