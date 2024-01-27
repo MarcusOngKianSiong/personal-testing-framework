@@ -13,7 +13,7 @@
         3. The test case can handle normal standard data. How to make it handle async functions?
             - 
 */
-
+global.fs = require('fs').promises
 
 // SETUP
 require('./testStructure.js');      // Produce the functionality for writing test cases
