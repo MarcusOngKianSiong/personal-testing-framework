@@ -1,3 +1,5 @@
+
+
 global.array_equal = function(a1,a2,orderConsideration=true){
     const length1 = a1.length;
     const  length2 = a2.length;
@@ -42,6 +44,22 @@ global.object_equal = function (object1,object2){
     }
     
     return true
+}
+
+global.array_object_content_equal = function(a1,a2){
+    const length1 = a1.length;
+    const  length2 = a2.length;
+    if(length1 !== length2){
+        return false
+    }
+    for(let i = 0;i<length1;i++){
+        const current_a1 = a1[i];
+        const current_a2 = a2[i];
+        if(!object_equal(current_a1,current_a2)){
+            return false;
+        }
+    }
+    return true;
 }
 
 global.displayDifferenceBetweenLinesInStrings = function(string1,string2){
